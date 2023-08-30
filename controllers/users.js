@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const userSchema = require('../models/user');
 
 const OK = 200;
-const SUCCESS = 201;
 const SERVER_ERROR = 500;
 const VALIDATION_ERROR = 400;
 const NOT_FOUND = 404;
@@ -25,12 +24,12 @@ module.exports.getUser = (req, res) => {
     .then((user) => {
       if (user === null) {
         return res
-          .status(NOT_FOUND)
+          .status(VALIDATION_ERROR)
           .send({ message: 'Запрашиваемый пользователь не найден' });
       }
       return res.status(OK).send(user);
     })
-    .catch(() => res.status(NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' }));
+    .catch(() => res.status(VALIDATION_ERROR).send({ message: 'Запрашиваемый пользователь не найден' }));
 };
 
 module.exports.createUser = (req, res) => {
@@ -60,7 +59,7 @@ module.exports.updateUser = (req, res) => {
       { name, about },
       { new: true, runValidators: true },
     )
-    .then((user) => res.status(SUCCESS).send({ data: user }))
+    .then((user) => res.status(OK).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res
@@ -79,7 +78,7 @@ module.exports.updateAvatar = (req, res) => {
 
   return userSchema
     .findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
-    .then((user) => res.status(SUCCESS).send({ data: user }))
+    .then((r) => res.status(OK).send(r))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res
