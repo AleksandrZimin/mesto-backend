@@ -1,4 +1,4 @@
-const cardSchema = require("../models/card");
+const cardSchema = require('../models/card');
 
 const OK = 200;
 const SUCCESS = 201;
@@ -11,12 +11,12 @@ module.exports.getCards = (req, res) => {
     .find({})
     .then((users) => res.status(OK).send({ data: users }))
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res
           .status(VALIDATION_ERROR)
           .send({ message: "Переданы некорректные данные" });
-      } else if (err.name === "ERR_ABORTED") {
-        return res.status(NOT_FOUND).send({ message: "Карточки не найдены" });
+      } else if (err.name === 'ERR_ABORTED') {
+        return res.status(NOT_FOUND).send({ message: 'Карточки не найдены' });
       } else {
         return res
           .status(SERVER_ERROR)
@@ -34,10 +34,10 @@ module.exports.createCard = (req, res) => {
     .create({ name, link, owner, likes: [], createdAt })
     .then((card) => res.status(SUCCESS).send({ data: card }))
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res
           .status(VALIDATION_ERROR)
-          .send({ message: "Неверные данные" });
+          .send({ message: 'Неверные данные' });
       } else {
         return res
           .status(SERVER_ERROR)
@@ -53,7 +53,7 @@ module.exports.deleteCard = (req, res) => {
     .findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send({ message: "Карточка не найдена" });
+        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
       res.status(OK).send({ data: card });
     })
@@ -71,7 +71,7 @@ module.exports.likeCard = (req, res) => {
   const card = cardSchema.findOne({ _id: cardId, likes: userId });
 
   if (card) {
-    return res.status(409).json({ message: "Вы уже лайкнули эту карточку" });
+    return res.status(409).json({ message: 'Вы уже лайкнули эту карточку' });
   }
   return cardSchema
     .findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
@@ -92,7 +92,7 @@ module.exports.dislikeCard = (req, res) => {
   if (!card) {
     return res
       .status(NOT_FOUND)
-      .json({ message: "Отсутствует лайк на карточке" });
+      .json({ message: 'Отсутствует лайк на карточке' });
   }
 
   return cardSchema

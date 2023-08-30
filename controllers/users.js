@@ -1,4 +1,4 @@
-const userSchema = require("../models/user");
+const userSchema = require('../models/user');
 
 const OK = 200;
 const SUCCESS = 201;
@@ -54,7 +54,7 @@ module.exports.createUser = (req, res) => {
       if (e instanceof mongoose.Error.ValidationError) {
         return res
           .status(VALIDATION_ERROR)
-          .send({ message: "Неверные данные" });
+          .send({ message: 'Неверные данные' });
       }
       return res
         .status(SERVER_ERROR)
@@ -79,7 +79,7 @@ module.exports.updateUser = (req, res) => {
       if (err.name === "ValidationError") {
         return res
           .status(VALIDATION_ERROR)
-          .send({ message: "Переданы некорректные данные" });
+          .send({ message: 'Переданы некорректные данные' });
       }
       return res
         .status(SERVER_ERROR)
@@ -100,7 +100,7 @@ module.exports.updateAvatar = (req, res) => {
       if (err.name === "ValidationError") {
         return res
           .status(VALIDATION_ERROR)
-          .send({ message: "Переданы некорректные данные" });
+          .send({ message: 'Переданы некорректные данные' });
       }
       return res
         .status(SERVER_ERROR)
