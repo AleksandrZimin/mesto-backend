@@ -7,21 +7,18 @@ const VALIDATION_ERROR = 400;
 const NOT_FOUND = 404;
 
 module.exports.getCards = (req, res) => {
-  return cardSchema
+  cardSchema
     .find({})
     .then((users) => res.status(OK).send({ data: users }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res
           .status(VALIDATION_ERROR)
-          .send({ message: "Переданы некорректные данные" });
-      } else if (err.name === 'ERR_ABORTED') {
+          .send({ message: 'Переданы некорректные данные' });
+      } if (err.name === 'ERR_ABORTED') {
         return res.status(NOT_FOUND).send({ message: 'Карточки не найдены' });
-      } else {
-        return res
-          .status(SERVER_ERROR)
-          .send({ message: `Произошла ошибка на сервере ${err}` });
       }
+      return res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере ${err}` });
     });
 };
 
@@ -31,23 +28,28 @@ module.exports.createCard = (req, res) => {
   const createdAt = Date.now();
 
   return cardSchema
-    .create({ name, link, owner, likes: [], createdAt })
+    .create({
+      name,
+      link,
+      owner,
+      likes: [],
+      createdAt,
+    })
     .then((card) => res.status(SUCCESS).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res
           .status(VALIDATION_ERROR)
           .send({ message: 'Неверные данные' });
-      } else {
-        return res
-          .status(SERVER_ERROR)
-          .send({ message: `Произошла ошибка на сервере ${err}` });
       }
+      return res
+        .status(SERVER_ERROR)
+        .send({ message: `Произошла ошибка на сервере ${err}` });
     });
 };
 
 module.exports.deleteCard = (req, res) => {
-  const cardId = req.params.cardId;
+  const { cardId } = req.params.cardId;
 
   return cardSchema
     .findByIdAndRemove(cardId)
@@ -55,17 +57,12 @@ module.exports.deleteCard = (req, res) => {
       if (!card) {
         return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
-      res.status(OK).send({ data: card });
-    })
-    .catch((err) =>
-      res
-        .status(SERVER_ERROR)
-        .send({ message: `Произошла ошибка на сервере ${err}` })
-    );
+      return res.status(OK).send({ data: card });
+    }).catch((err) => res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере ${err}` }));
 };
 
 module.exports.likeCard = (req, res) => {
-  const cardId = req.params.cardId;
+  const { cardId } = req.params.cardId;
   const userId = req.user._id;
 
   const card = cardSchema.findOne({ _id: cardId, likes: userId });
@@ -76,15 +73,11 @@ module.exports.likeCard = (req, res) => {
   return cardSchema
     .findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
     .then((r) => res.status(OK).send({ data: r }))
-    .catch((err) =>
-      res
-        .status(SERVER_ERROR)
-        .send({ message: `Произошла ошибка на сервере ${err}` })
-    );
+    .catch((err) => res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере ${err}` }));
 };
 
 module.exports.dislikeCard = (req, res) => {
-  const cardId = req.params.cardId;
+  const { cardId } = req.params.cardId;
   const userId = req.user._id;
 
   const card = cardSchema.findOne({ _id: cardId, likes: userId });
@@ -98,7 +91,5 @@ module.exports.dislikeCard = (req, res) => {
   return cardSchema
     .findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then((r) => res.status(OK).send({ data: r }))
-    .catch((err) =>
-      res.status(SERVER_ERROR).send({ message: `Произошла ошибка: ${err}` })
-    );
+    .catch((err) => res.status(SERVER_ERROR).send({ message: `Произошла ошибка: ${err}` }));
 };

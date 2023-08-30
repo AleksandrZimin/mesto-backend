@@ -14,10 +14,10 @@ mongoose
     useNewUrlParser: true,
   })
   .then(() => {
-    console.log('Connected to DB');
+    process.stdout.write('Connected to DB');
   })
   .catch((err) => {
-    console.log(`Ошибка: ${err}`);
+    process.stdout.write(`Ошибка: ${err}`);
   });
 
 app.use('/', require('./routes/users'));
@@ -34,5 +34,5 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
+  process.stdout.write(`App listening on port ${PORT}`);
 });
