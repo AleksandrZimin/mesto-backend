@@ -24,12 +24,12 @@ module.exports.getUser = (req, res) => {
     .then((user) => {
       if (user === null) {
         return res
-          .status(VALIDATION_ERROR)
+          .status(NOT_FOUND)
           .send({ message: 'Запрашиваемый пользователь не найден' });
       }
       return res.status(OK).send(user);
     })
-    .catch(() => res.status(VALIDATION_ERROR).send({ message: 'Запрашиваемый пользователь не найден' }));
+    .catch(() => res.status(NOT_FOUND).send({ message: 'Запрашиваемый пользователь не найден' }));
 };
 
 module.exports.createUser = (req, res) => {
@@ -59,7 +59,7 @@ module.exports.updateUser = (req, res) => {
       { name, about },
       { new: true, runValidators: true },
     )
-    .then((user) => res.status(OK).send({ data: user }))
+    .then((updatedUser) => res.status(OK).send({ data: updatedUser }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res
@@ -78,7 +78,7 @@ module.exports.updateAvatar = (req, res) => {
 
   return userSchema
     .findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
-    .then((r) => res.status(OK).send(r))
+    .then((r) => res.status(OK).send({ data: r.avatar }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res

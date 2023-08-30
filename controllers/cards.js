@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const cardSchema = require('../models/card');
 
 const OK = 200;
@@ -65,19 +66,16 @@ module.exports.likeCard = (req, res) => {
   const { cardId } = req.params.cardId;
   const userId = req.user._id;
 
-  const card = cardSchema.findOne({ _id: cardId, likes: userId });
-
-  if (card) {
-    return res.status(OK).json({ message: 'Вы уже лайкнули эту карточку' });
-  }
-  return cardSchema
-    .findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
-    .then((r) => res.status(OK).send({ data: r }))
+  return cardSchema.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
+    .then((r) => r.status(OK).send({ data: r }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(VALIDATION_ERROR).json({ message: 'Переданы некорректные данные' });
+      if (err instanceof mongoose.Error.CastError) {
+        return res.status(VALIDATION_ERROR).send({ message: `Некорректный id: ${cardId}` });
       }
-      return res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере ${err}` });
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
+        return res.status(NOT_FOUND).send({ message: 'Переданы некорректные данные' });
+      }
+      return res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере: ${err}` });
     });
 };
 
@@ -87,7 +85,7 @@ module.exports.dislikeCard = (req, res) => {
 
   cardSchema.findOne({ _id: cardId, likes: userId }).then((card) => {
     if (!card) {
-      return res.status(VALIDATION_ERROR).json({ message: 'Переданы некорректные данные' });
+      return res.status(NOT_FOUND).json({ message: 'Переданы некорректные данные' });
     }
     return cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
       .then((updatedCard) => {
