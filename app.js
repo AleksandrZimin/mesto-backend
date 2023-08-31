@@ -23,7 +23,7 @@ mongoose
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
-app.get('*', (req, res) => res.status(404).send('Страница не найдена'));
+app.get('*', (req, res) => res.status(404).send({ message: 'Страницы не существует' }));
 
 app.use((req, res, next) => {
   req.user = {

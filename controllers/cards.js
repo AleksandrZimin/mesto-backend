@@ -75,7 +75,14 @@ module.exports.likeCard = (req, res) => {
       { $addToSet: { likes: req.user._id } },
       { new: true },
     )
-    .then((r) => res.status(OK).send({ data: `Лайк поставлен: ${r}` }))
+    .then((r) => {
+      if (cardId === null) {
+        return res
+          .status(NOT_FOUND)
+          .send({ message: 'Запрашиваемой карточки нет в базе данных' });
+      }
+      return res.status(OK).send({ data: `Лайк поставлен: ${r}` });
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
         return res.status(VALIDATION_ERROR).send({ message: `Некорректный id: ${cardId}` });
@@ -90,28 +97,25 @@ module.exports.likeCard = (req, res) => {
     });
 };
 
-module.exports.dislikeCard = async (req, res) => {
-  try {
-    const { cardId } = req.params;
-    const userId = req.user._id;
+module.exports.dislikeCard = (req, res) => {
+  const { cardId } = req.params.cardId;
+  const userId = req.user._id;
 
-    if (!mongoose.Types.ObjectId.isValid(cardId)) {
-      return res.status(400).json({ message: 'Некорректный id карточки' });
+  cardSchema.findOne({ _id: cardId, likes: userId }).then(() => {
+    if (cardId === null) {
+      return res.status(NOT_FOUND).json({ message: 'Карточки не существует в базе данных' });
     }
-    const card = await cardSchema.findOne({ _id: cardId, likes: userId });
-    if (!card) {
-      return res.status(NOT_FOUND).json({ message: 'Карточка не найдена или пользователь не поставил лайк' });
-    }
-    const updatedCard = await cardSchema.findByIdAndUpdate(
-      cardId,
-      { $pull: { likes: userId } },
-      { new: true },
-    );
-    if (!updatedCard) {
-      return res.status(500).json({ message: 'Ошибка при обновлении карточки' });
-    }
-    return res.status(200).json({ data: updatedCard });
-  } catch (err) {
-    return res.status(500).json({ message: `Произошла ошибка: ${err}` });
-  }
+    return cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
+      .then((updatedCard) => {
+        if (cardId === null) {
+          return res.status(NOT_FOUND).json({ message: 'Карточки не существует в базе данных2' });
+        }
+        if (!updatedCard) {
+          return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка при обновлении карточки' });
+        }
+        return res.status(OK).send({ data: updatedCard });
+      })
+      .catch((err) => res.status(SERVER_ERROR).send({ message: `Произошла ошибка при обновлении карточки: ${err}` }));
+  })
+    .catch((err) => res.status(SERVER_ERROR).send({ message: `Произошла ошибка при поиске карточки: ${err}` }));
 };
