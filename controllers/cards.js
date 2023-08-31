@@ -50,16 +50,21 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  const { cardId } = req.params.cardId;
+  const { cardId } = req.params;
 
   return cardSchema
     .findByIdAndRemove(cardId)
     .then((card) => {
-      if (!card) {
-        return res.status(VALIDATION_ERROR).send({ message: 'Карточка не найдена' });
+      if (!cardId) {
+        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
       return res.status(OK).send({ data: card });
-    }).catch((err) => res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере ${err}` }));
+    }).catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        return res.status(NOT_FOUND).send({ message: `Некорректный id: ${cardId}` });
+      }
+      return res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере ${err}` });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
@@ -67,7 +72,7 @@ module.exports.likeCard = (req, res) => {
   const userId = req.user._id;
 
   return cardSchema.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
-    .then((r) => r.status(OK).send({ data: r }))
+    .then((r) => res.status(OK).send({ data: r }))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
         return res.status(VALIDATION_ERROR).send({ message: `Некорректный id: ${cardId}` });
@@ -75,7 +80,7 @@ module.exports.likeCard = (req, res) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
         return res.status(NOT_FOUND).send({ message: 'Переданы некорректные данные' });
       }
-      return res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере: ${err}` });
+      return res.status(OK).send({ message: `Произошла ошибка на сервере: ${err}` });
     });
 };
 
@@ -85,7 +90,7 @@ module.exports.dislikeCard = (req, res) => {
 
   cardSchema.findOne({ _id: cardId, likes: userId }).then((card) => {
     if (!card) {
-      return res.status(NOT_FOUND).json({ message: 'Переданы некорректные данные' });
+      return res.status(OK).json({ message: 'Переданы некорректные данные' });
     }
     return cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
       .then((updatedCard) => {
