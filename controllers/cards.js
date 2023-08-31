@@ -12,7 +12,7 @@ module.exports.getCards = (req, res) => {
     .find({})
     .then((users) => res.status(OK).send({ data: users }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.Error.ValidationError) {
         return res
           .status(VALIDATION_ERROR)
           .send({ message: 'Переданы некорректные данные' });
@@ -38,7 +38,7 @@ module.exports.createCard = (req, res) => {
     })
     .then((card) => res.status(SUCCESS).send({ data: card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.Error.ValidationError) {
         return res
           .status(VALIDATION_ERROR)
           .send({ message: 'Неверные данные' });
@@ -54,14 +54,13 @@ module.exports.deleteCard = (req, res) => {
 
   return cardSchema
     .findByIdAndRemove(cardId)
-    .then((card) => {
+    .then((card) => res.status(OK).send({ data: card }))
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        return res.status(VALIDATION_ERROR).send({ message: `Некорректный id: ${cardId}` });
+      }
       if (!cardId) {
         return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
-      }
-      return res.status(OK).send({ data: card });
-    }).catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        return res.status(NOT_FOUND).send({ message: `Некорректный id: ${cardId}` });
       }
       return res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере ${err}` });
     });
@@ -79,10 +78,13 @@ module.exports.likeCard = (req, res) => {
     .then((r) => res.status(OK).send({ data: `Лайк поставлен: ${r}` }))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        return res.status(NOT_FOUND).send({ message: `Некорректный id: ${cardId}` });
+        return res.status(VALIDATION_ERROR).send({ message: `Некорректный id: ${cardId}` });
       }
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
         return res.status(NOT_FOUND).send({ message: `Карточки с таким id нет: ${cardId}` });
+      }
+      if (!cardId) {
+        return res.status(NOT_FOUND).send({ message: `В базе такой карточки нету: ${cardId}` });
       }
       return res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере: ${err.name}` });
     });
@@ -98,7 +100,7 @@ module.exports.dislikeCard = async (req, res) => {
     }
     const card = await cardSchema.findOne({ _id: cardId, likes: userId });
     if (!card) {
-      return res.status(400).json({ message: 'Карточка не найдена или пользователь не поставил лайк' });
+      return res.status(NOT_FOUND).json({ message: 'Карточка не найдена или пользователь не поставил лайк' });
     }
     const updatedCard = await cardSchema.findByIdAndUpdate(
       cardId,
