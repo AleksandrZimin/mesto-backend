@@ -1,13 +1,5 @@
 const router = require('express').Router();
 
-router.use((req, res, next) => {
-  req.user = {
-    _id: '64ed317e8a488d24cf70c20e', // вставьте сюда _id созданного в предыдущем пункте пользователя
-  };
-
-  next();
-});
-
 const {
   getCards,
   createCard,
