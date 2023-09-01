@@ -61,13 +61,15 @@ module.exports.deleteCard = (req, res) => {
   return cardSchema
     .findByIdAndRemove(cardId)
     .populate(['owner', 'likes'])
-    .then((card) => res.status(OK).send({ data: card }))
+    .then((card) => {
+      if (!cardId) {
+        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
+      }
+      return res.status(OK).send({ data: card });
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
         return res.status(VALIDATION_ERROR).send({ message: `Некорректный id: ${cardId}` });
-      }
-      if (!cardId) {
-        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
       return res.status(SERVER_ERROR).send({ message: `Произошла ошибка на сервере ${err}` });
     });
@@ -109,7 +111,6 @@ module.exports.dislikeCard = (req, res) => {
   cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .populate(['owner', 'likes'])
     .then((updatedCard) => {
-      console.log(updatedCard);
       if (!updatedCard) {
         return res.status(NOT_FOUND).send({ message: 'Карточки не существует в базе данных' });
       }

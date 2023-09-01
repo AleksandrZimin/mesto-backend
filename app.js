@@ -31,7 +31,7 @@ mongoose
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
-app.get('*', (req, res) => res.status(404).send({ message: 'Страницы не существует' }));
+app.get('/*', (req, res) => res.status(404).send({ message: 'Страницы не существует' }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
