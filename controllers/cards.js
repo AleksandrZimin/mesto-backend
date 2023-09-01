@@ -37,8 +37,12 @@ module.exports.createCard = (req, res) => {
       likes: [],
       createdAt,
     })
-    .populate(['owner', 'likes'])
-    .then((card) => res.status(SUCCESS).send({ data: card }))
+    .then((card) => {
+      card.populate(['owner'])
+        .then(() => {
+          res.status(SUCCESS).send({ data: card });
+        });
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         return res
@@ -105,6 +109,7 @@ module.exports.dislikeCard = (req, res) => {
   cardSchema.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .populate(['owner', 'likes'])
     .then((updatedCard) => {
+      console.log(updatedCard);
       if (!updatedCard) {
         return res.status(NOT_FOUND).send({ message: 'Карточки не существует в базе данных' });
       }
