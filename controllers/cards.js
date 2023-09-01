@@ -59,10 +59,10 @@ module.exports.deleteCard = (req, res) => {
   const { cardId } = req.params;
 
   return cardSchema
-    .findByIdAndRemove(cardId)
+    .findByIdAndDelete(cardId)
     .populate(['owner', 'likes'])
     .then((card) => {
-      if (!cardId) {
+      if (!card) {
         return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
       return res.status(OK).send({ data: card });
