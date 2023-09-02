@@ -28,8 +28,8 @@ mongoose
     console.log(`Ошибка: ${err}`);
   });
 
-app.use('/', require('./routes/users'));
-app.use('/', require('./routes/cards'));
+app.use('/', require('./src/routes/users'));
+app.use('/', require('./src/routes/cards'));
 
 app.use('/*', (req, res) => res.status(404).send({ message: 'Страницы не существует' }));
 
