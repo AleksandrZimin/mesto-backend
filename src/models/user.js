@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    versionKey: false, // https://mongoosejs.com/docs/guide.html#versionKey
+    versionKey: false,
   },
 );
 
