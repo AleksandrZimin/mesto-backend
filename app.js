@@ -2,15 +2,17 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
+const { errors } = require('celebrate');
 const auth = require('./src/middlewares/auth');
 const NotFound = require('./src/errors/NotFound');
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
+app.use(errors());
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(Errors());
 
 mongoose
   .connect('mongodb://127.0.0.1:27017/mestodb', {
