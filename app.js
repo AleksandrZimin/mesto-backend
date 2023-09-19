@@ -3,12 +3,14 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
 const auth = require('./src/middlewares/auth');
+const NotFound = require('./src/errors/NotFound');
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(Errors());
 
 mongoose
   .connect('mongodb://127.0.0.1:27017/mestodb', {
@@ -26,7 +28,7 @@ app.use(auth);
 app.use('/users', require('./src/routes/users'));
 app.use('/cards', require('./src/routes/cards'));
 
-app.use('/*', (req, res) => res.status(404).send({ message: 'Страницы не существует' }));
+app.use('/*', (next) => next(new NotFound('Страницы не существует')));
 
 app.use(express.static(path.join(__dirname, 'public')));
 

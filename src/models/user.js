@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const { default: isEmail } = require('validator/lib/isEmail');
-const Unauthorized = require('../errors/Unauthorized');
-// const urlValidation = require('../../utils/validators');
+const { Unauthorized } = require('../errors/Unauthorized');
+const regExpUrl = require('../utils/validators');
 
 const userSchema = new mongoose.Schema(
   {
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
       default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-      // validate: { validator: urlValidation },
+      validate: { validator: regExpUrl },
     },
     email: {
       type: String,

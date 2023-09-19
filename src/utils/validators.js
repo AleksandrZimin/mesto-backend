@@ -1,5 +1,7 @@
-const regExpUrl = /https?:\/\/(www\.)?[a-z0-9.-]{2,}\.[a-z]{2,}\/?[-._~:/?#[\]@!$&'()*+,;=]*/;
+// const regExpUrl = /https?:\/\/(www\.)?[a-z0-9.-]{2,}\.[a-z]{2,}\/?[-._~:/?#[\]@!$&'()*+,;=]*/;
 
-const urlValidation = (url) => regExpUrl.test(url);
+const regExpUrl = /^(https?:\/\/)?([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/i;
 
-module.exports = urlValidation;
+// const urlValidation = (url) => regExpUrl.test(url);
+
+module.exports = regExpUrl;
