@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-
 const mongoose = require('mongoose');
 const userSchema = require('../models/user');
 // const Unauthorized = require('../../errors/Unauthorized');
@@ -8,6 +7,7 @@ const NotFound = require('../errors/NotFound');
 const Success = require('../errors/Success');
 const BadRequest = require('../errors/BadRequest');
 const Conflict = require('../errors/Conflict');
+
 
 module.exports.getUsers = (req, res, next) => {
   userSchema
@@ -59,7 +59,7 @@ module.exports.createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.status(201).send({ user }))
+    .then((user) => res.status(201).send({ name: user.name, about: user.about, avatar: user.avatar, email: user.email }))
     .catch((err) => {
       if (err.code === 11000) {
         next(new Conflict('Пользователь с таким email уже существует'));
@@ -123,7 +123,7 @@ module.exports.updateAvatar = (req, res, next) => {
 
   return userSchema
     .findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
-    .then(() => next(new Success({ avatar })))
+    .then(() => res.send({avatar}))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         next(new BadRequest('Переданы некорректные данные'));

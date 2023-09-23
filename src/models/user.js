@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const { default: isEmail } = require('validator/lib/isEmail');
-const { Unauthorized } = require('../errors/Unauthorized');
+const Unauthorized = require('../errors/Unauthorized');
 // const regExpUrl = require('../utils/validators');
 const { urlValidation } = require('../utils/validators');
 

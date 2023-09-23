@@ -28,7 +28,7 @@ app.use(auth);
 app.use('/users', require('./src/routes/users'));
 app.use('/cards', require('./src/routes/cards'));
 
-app.use('/*', (next) => next(new NotFound('Страницы не существует')));
+app.use('/*', (req, res, next) => next(new NotFound('Страницы не существует')));
 
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -81,9 +81,9 @@ module.exports.likeCard = (req, res, next) => {
     .populate(['owner', 'likes'])
     .then((card) => {
       if (!card) {
-        next(new NotFound('Запрашиваемой карточки нет в базе данных'));
+        throw new NotFound('Запрашиваемой карточки нет в базе данных');
       }
-      next(new Success({ data: card }));
+      res.send({ data: card });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
@@ -104,7 +104,7 @@ module.exports.dislikeCard = (req, res, next) => {
     .populate(['owner', 'likes'])
     .then((updatedCard) => {
       if (!updatedCard) {
-        next(new NotFound('Карточки не существует в базе данных'));
+        throw new NotFound('Карточки не существует в базе данных');
       }
       res.send({ data: updatedCard });
     })
