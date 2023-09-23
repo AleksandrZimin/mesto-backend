@@ -11,11 +11,11 @@ module.exports.getCards = (req, res, next) => {
     .then((cards) => res.send({ data: cards }))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequest('Переданы некорректные данные'));
+        return next(new BadRequest('Переданы некорректные данные'));
       } if (err.name === 'ERR_ABORTED') {
-        next(new NotFound('Карточки не найдены'));
+        return next(new NotFound('Карточки не найдены'));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -34,15 +34,13 @@ module.exports.createCard = (req, res, next) => {
     })
     .then((card) => {
       card.populate(['owner'])
-        .then(() => {
-          res.send({ data: card });
-        });
+        .then(() => res.status(201).send({ data: card }));
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequest('Неверные данные'));
+        return next(new BadRequest('Неверные данные'));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -51,20 +49,20 @@ module.exports.deleteCard = (req, res, next) => {
 
   cardSchema.findById(cardId)
     .then((card) => {
-      if (!card) next(new NotFound('Данные по указанному id не найдены'));
+      if (!card) return next(new NotFound('Данные по указанному id не найдены'));
       if (`${card.owner}` !== req.user._id) {
-        next(new Forbidden('Доступ запрещен'));
+        return next(new Forbidden('Доступ запрещен'));
       }
-      card
+      return card
         .deleteOne()
         .then(() => res.send({ data: card }))
         .catch((err) => next(err));
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequest('Неверные параметры запроса'));
+        return next(new BadRequest('Неверные параметры запроса'));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -86,12 +84,12 @@ module.exports.likeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequest(`Некорректный id: ${cardId}`));
+        return next(new BadRequest(`Некорректный id: ${cardId}`));
       }
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        next(new NotFound(`Карточки с таким id нет: ${cardId}`));
+        return next(new NotFound(`Карточки с таким id нет: ${cardId}`));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -105,12 +103,12 @@ module.exports.dislikeCard = (req, res, next) => {
       if (!updatedCard) {
         throw new NotFound('Карточки не существует в базе данных');
       }
-      res.send({ data: updatedCard });
+      return res.send({ data: updatedCard });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequest(`Некорректный id: ${cardId}`));
+        return next(new BadRequest(`Некорректный id: ${cardId}`));
       }
-      next(err);
+      return next(err);
     });
 };

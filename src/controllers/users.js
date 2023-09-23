@@ -31,12 +31,12 @@ module.exports.getUserById = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequest('Некорректный id пользователя'));
+        return next(new BadRequest('Некорректный id пользователя'));
       }
       if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequest(`Некорректный id пользователя ${userID}`));
+        return next(new BadRequest(`Некорректный id пользователя ${userID}`));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -45,10 +45,10 @@ module.exports.createUser = (req, res, next) => {
     name, about, avatar, email, password,
   } = req.body;
   if (!email || !password) {
-    next(new BadRequest('Email или пароль не могут быть пустыми'));
+    return next(new BadRequest('Email или пароль не могут быть пустыми'));
   }
 
-  bcrypt.hash(password, 10)
+  return bcrypt.hash(password, 10)
     .then((hash) => userSchema.create({
       name,
       about,
@@ -61,11 +61,11 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.code === 11000) {
-        next(new Conflict('Пользователь с таким email уже существует'));
-      } else if (err.name === 'ValidationError') {
-        next(new BadRequest('Некорректные данные при создании пользователя.'));
+        return next(new Conflict('Пользователь с таким email уже существует'));
+      } if (err.name === 'ValidationError') {
+        return next(new BadRequest('Некорректные данные при создании пользователя.'));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -89,10 +89,9 @@ module.exports.getUser = (req, res, next) => {
     .findById(userId)
     .then((user) => {
       if (user) {
-        res.send(user);
-        return;
+        return res.send(user);
       }
-      next(new NotFound('Пользователь по указанному id не найден'));
+      return next(new NotFound('Пользователь по указанному id не найден'));
     })
     .catch((err) => next(err));
 };
@@ -110,9 +109,9 @@ module.exports.updateUser = (req, res, next) => {
     .then(() => res.send({ data: { name, about } }))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequest('Переданы некорректные данные'));
+        return next(new BadRequest('Переданы некорректные данные'));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -125,7 +124,7 @@ module.exports.updateAvatar = (req, res, next) => {
     .then(() => res.send({ avatar }))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequest('Переданы некорректные данные'));
+        return next(new BadRequest('Переданы некорректные данные'));
       }
       return res.send({ avatar });
     });
