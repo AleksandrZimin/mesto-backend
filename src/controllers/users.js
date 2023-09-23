@@ -19,19 +19,19 @@ module.exports.getUsers = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.getUser = (req, res, next) => {
+module.exports.getUserById = (req, res, next) => {
   const { userID } = req.params;
   return userSchema
     .findById(userID)
     .then((user) => {
-      if (user === null) {
-        next(new NotFound('Запрашиваемый пользователь без данных'));
+      if (!user) {
+        throw new NotFound('Запрашиваемый пользователь не найден');
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequest('Запрашиваемый пользователь не найден'));
+        next(new BadRequest('Некорректный id пользователя'));
       }
       if (err instanceof mongoose.Error.CastError) {
         next(new BadRequest(`Некорректный id пользователя ${userID}`));

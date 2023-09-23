@@ -7,6 +7,7 @@ const {
   getUser,
   updateUser,
   updateAvatar,
+  getUserById,
 } = require('../controllers/users');
 
 router.get('/', getUsers);
@@ -26,6 +27,6 @@ router.get('/:userID', celebrate({
   params: Joi.object().keys({
     userID: Joi.string().length(24).hex().required(),
   }),
-}), getUser);
+}), getUserById);
 
 module.exports = router;
