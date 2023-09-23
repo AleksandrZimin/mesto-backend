@@ -1,7 +1,6 @@
 const { default: mongoose } = require('mongoose');
 const cardSchema = require('../models/card');
 const NotFound = require('../errors/NotFound');
-const Success = require('../errors/Success');
 const BadRequest = require('../errors/BadRequest');
 const Forbidden = require('../errors/Forbidden');
 
