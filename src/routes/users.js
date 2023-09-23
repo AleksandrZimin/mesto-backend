@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
-const regExpUrl = require('../utils/validators');
+const { regExpUrl } = require('../utils/validators');
 
 const {
   getUsers,
@@ -19,7 +19,7 @@ router.patch('/me', celebrate({
 }), updateUser);
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().regex(regExpUrl),
+    avatar: Joi.string().required().pattern(regExpUrl),
   }),
 }), updateAvatar);
 router.get('/:userID', celebrate({
